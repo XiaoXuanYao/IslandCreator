@@ -1,0 +1,33 @@
+{
+	"schemaVersion": 1,
+	"id": "islandcreator",
+	"version": "${version}",
+	"name": "Island Creator",
+	"description": "To make a island by algorithm, instead by hand.",
+	"authors": [
+		"XiaoMuchen"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/islandcreator/textures/item/island_item.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.HuangLi.IslandCreator"
+		]
+	},
+	"mixins": [
+	],
+	"depends": {
+		"fabricloader": ">=0.14.21",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
