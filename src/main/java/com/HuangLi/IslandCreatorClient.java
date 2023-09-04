@@ -41,7 +41,7 @@ public class IslandCreatorClient implements ClientModInitializer {
 
         UseItemCallback.EVENT.register(((player, world, hand) -> {
             if (player.getMainHandStack().getItem().getTranslationKey().equals("item.islandcreator.island_item")) {
-                genIsland(player, world);
+                genIsland(player, world, true);
             }
             return TypedActionResult.pass(ItemStack.EMPTY);
         }));
