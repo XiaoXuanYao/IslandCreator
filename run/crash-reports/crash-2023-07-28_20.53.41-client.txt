@@ -5,8 +5,8 @@ Time: 2023-07-28 20:53:41
 Description: Unexpected error
 
 java.lang.ArrayIndexOutOfBoundsException: Index -20 out of bounds for length 128
-	at com.HuangLi.IslandCreator.OnIslandUse(IslandCreator.java:112)
-	at com.HuangLi.IslandCreator.lambda$onInitialize$2(IslandCreator.java:68)
+	at com.huangli.IslandCreator.OnIslandUse(IslandCreator.java:112)
+	at com.huangli.IslandCreator.lambda$onInitialize$2(IslandCreator.java:68)
 	at net.fabricmc.fabric.api.event.player.UseItemCallback.lambda$static$0(UseItemCallback.java:42)
 	at net.minecraft.client.network.ClientPlayerInteractionManager.handler$bec000$fabric-events-interaction-v0$interactItem(ClientPlayerInteractionManager.java:1704)
 	at net.minecraft.client.network.ClientPlayerInteractionManager.interactItem(ClientPlayerInteractionManager.java:377)
@@ -28,8 +28,8 @@ A detailed walkthrough of the error, its code path and all known details is as f
 -- Head --
 Thread: Render thread
 Stacktrace:
-	at com.HuangLi.IslandCreator.OnIslandUse(IslandCreator.java:112)
-	at com.HuangLi.IslandCreator.lambda$onInitialize$2(IslandCreator.java:68)
+	at com.huangli.IslandCreator.OnIslandUse(IslandCreator.java:112)
+	at com.huangli.IslandCreator.lambda$onInitialize$2(IslandCreator.java:68)
 	at net.fabricmc.fabric.api.event.player.UseItemCallback.lambda$static$0(UseItemCallback.java:42)
 	at net.minecraft.client.network.ClientPlayerInteractionManager.handler$bec000$fabric-events-interaction-v0$interactItem(ClientPlayerInteractionManager.java:1704)
 	at net.minecraft.client.network.ClientPlayerInteractionManager.interactItem(ClientPlayerInteractionManager.java:377)

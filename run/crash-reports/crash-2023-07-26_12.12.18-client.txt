@@ -26,7 +26,7 @@ Caused by: java.lang.ExceptionInInitializerError
 	... 8 more
 Caused by: java.lang.IllegalStateException: No display name set for ItemGroup
 	at net.fabricmc.fabric.impl.itemgroup.FabricItemGroupBuilderImpl.build(FabricItemGroupBuilderImpl.java:39)
-	at com.HuangLi.IslandCreator.<clinit>(IslandCreator.java:18)
+	at com.huangli.IslandCreator.<clinit>(IslandCreator.java:18)
 	... 14 more
 
 
