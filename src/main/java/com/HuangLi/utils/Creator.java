@@ -1,6 +1,8 @@
 package com.huangli.utils;
 
 import com.mojang.brigadier.Command;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -35,9 +37,16 @@ public class Creator {
                 .formatted(radius, height))
                         .setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
 
-        source.sendMessage(
-                Text.literal("Use /island confirm to create this island")
-                        .setStyle(Style.EMPTY.withColor(Formatting.GOLD)));
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
+            source.sendMessage(
+                    Text.literal("Use /island confirm to create this island")
+                            .setStyle(Style.EMPTY.withColor(Formatting.GOLD)));
+        }
+        else {
+            source.sendMessage(
+                    Text.literal("Use /island confirm or use island create item to create this island")
+                            .setStyle(Style.EMPTY.withColor(Formatting.GOLD)));
+        }
 
         return Command.SINGLE_SUCCESS;
     }
