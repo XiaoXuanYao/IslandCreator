@@ -5,11 +5,12 @@
 	"name": "Island Creator",
 	"description": "To make a island by algorithm, instead by hand.",
 	"authors": [
-		"XiaoMuchen"
+		"XiaoMuchen",
+		"Disy920"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://www.starlight.cool",
+		"sources": "https://github.com/XiaoXuanyao/IslandCreator"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/islandcreator/textures/item/island_item.png",

@@ -1,5 +1,6 @@
 package com.huangli;
 
+import com.huangli.utils.Creator;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -41,7 +42,7 @@ public class IslandCreatorClient implements ClientModInitializer {
 
         UseItemCallback.EVENT.register(((player, world, hand) -> {
             if (player.getMainHandStack().getItem().getTranslationKey().equals("item.islandcreator.island_item")) {
-                genIsland(player, world, true);
+                genIsland(player, world, Creator.Radius > 150 || Creator.Height > 150);
             }
             return TypedActionResult.pass(ItemStack.EMPTY);
         }));

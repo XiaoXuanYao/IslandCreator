@@ -49,7 +49,28 @@ public class IslandCreator implements ModInitializer {
 										.then(literal("async")
 												.executes(ctx -> islandCommand(ctx, true))
 										)
-										.executes(ctx -> islandCommand(ctx, false))
+										.then(literal("sync")
+												.executes(ctx -> islandCommand(ctx, false))
+										)
+										.then(literal("auto")
+												.executes(ctx -> {
+													if (Creator.Radius > 150 || Creator.Height > 150) {
+														return islandCommand(ctx, true);
+													}
+													else {
+														return islandCommand(ctx, false);
+													}
+												})
+
+										)
+										.executes(ctx -> {
+											if (Creator.Radius > 150 || Creator.Height > 150) {
+												return islandCommand(ctx, true);
+											}
+											else {
+												return islandCommand(ctx, false);
+											}
+										})
 								)
 				));
 	}
@@ -63,8 +84,12 @@ public class IslandCreator implements ModInitializer {
 			source.sendMessage(Text.literal("Only player can use this command!").setStyle(Style.EMPTY.withColor(Formatting.RED)));
 		}
 		else {
-			Creator.genIsland(player, player.world, async);
-			source.sendMessage(Text.literal("The island has been generated successful!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+			try {
+				Creator.genIsland(player, player.world, async);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		return Command.SINGLE_SUCCESS;

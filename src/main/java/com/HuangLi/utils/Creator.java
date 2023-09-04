@@ -21,8 +21,10 @@ import static java.lang.Math.*;
 
 public class Creator {
 
-    static int Radius = 20;
-    static int Height = 6;
+    public static int Radius = 20;
+    public static int Height = 6;
+
+    static final int area = 3;
 
     public static int islandSettings(ServerCommandSource source, int radius, int height) {
         Radius = radius;
@@ -47,77 +49,32 @@ public class Creator {
         final float A = (float) Height / (Radius * Radius);
         final int h = (int) (A * Radius * Radius);  // max(y) - y value of the highest block of island
         final int noiseMapSize = (int) (Radius * 1.7F);
-        final int area = 3;
+
         final Vec3i originPos = new Vec3i(
                 (int) player.getPos().x,
                 (int) player.getPos().y - 2 - h,
                 (int) player.getPos().z
         );
 
-        calcIsland(area, noiseMapSize, A, h, originPos, world, async);
+        calcIsland(noiseMapSize, A, h, originPos, world, player, async);
         
     }
 
-    private static void calcIsland(int area, int noiseMapSize, float A, int h, Vec3i originPos, World world, boolean async) {
+    private static void calcIsland(int noiseMapSize, float A, int h, Vec3i originPos, World world, PlayerEntity player, boolean async) {
+        player.sendMessage(Text.literal("Generating...").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
+
         final float[][] noiseMap = new float[noiseMapSize][noiseMapSize];
         final float[][] noiseMap2 = new float[noiseMapSize][noiseMapSize];
 
-        final List<IslandBlockData> blockDataList = Collections.synchronizedList(new ArrayList<>(2048));
-
         long start = System.currentTimeMillis();
 
-        if (async) {
-            final int piece = noiseMapSize / 8;
-            final List<Thread> buildThreads = new ArrayList<>(8);
-
-            for (int c = 0; c < 8; c++) {
-                final int count = c;
-
-                Thread buildThread = new Thread(() -> {
-                    final int maxVal = min(noiseMapSize, piece * (count + 1));
-
-                    for (int i = piece * count; i < maxVal; i++) {
-                        for (int j = piece * count; j < maxVal; j++) {
-                            float mapValue1 = (float) (random() - 0.5F) * ((float) pow(Height, 0.5F) * 1.5F + 3);
-                            float mapValue2 = (float) (random() - 0.5F) * ((float) pow(Height, 0.7F) * 0.6F + 3);
-
-                            synchronized ("Map generator") {
-                                noiseMap[i][j] = mapValue1;
-                                noiseMap2[i][j] = mapValue2;
-                            }
-
-                        }
-                    }
-                });
-
-                buildThread.start();
-
-                buildThreads.add(buildThread);
+        for (int i = 0; i < noiseMapSize; i++) {
+            for (int j = 0; j < noiseMapSize; j++) {
+                noiseMap[i][j] = (float) (random() - 0.5F) * ((float) pow(Height, 0.5F) * 1.5F + 3);
+                noiseMap2[i][j] = (float) (random() - 0.5F) * ((float) pow(Height, 0.7F) * 0.6F + 3);
             }
-
-            for (Thread thread : buildThreads) {
-                try {
-                    thread.join();
-                }
-                catch (InterruptedException e) {
-                    return;
-                }
-            }
-
-            System.out.println("异步噪声生成耗时：" + (System.currentTimeMillis() - start) + "ms");
-        }
-        else {
-            for (int i = 0; i < noiseMapSize; i++) {
-                for (int j = 0; j < noiseMapSize; j++) {
-                    noiseMap[i][j] = (float) (random() - 0.5F) * ((float) pow(Height, 0.5F) * 1.5F + 3);
-                    noiseMap2[i][j] = (float) (random() - 0.5F) * ((float) pow(Height, 0.7F) * 0.6F + 3);
-                }
-            }
-
-            System.out.println("同步噪声生成耗时：" + (System.currentTimeMillis() - start) + "ms");
         }
 
-        start = System.currentTimeMillis();
         for (int i = 0; i < pow(noiseMapSize, 1.25); i++) {
             int x = (int) (random() * (noiseMapSize - 1 - area * 2)) + area;
             int z = (int) (random() * (noiseMapSize - 1 - area * 2)) + area;
@@ -155,12 +112,18 @@ public class Creator {
         start = System.currentTimeMillis();
 
         if (async) {
-            final int piece = (2 * Radius) / 8;
-            final List<Thread> buildThreads = new ArrayList<>(8);
+            final int minBuildThreadNum = 32;
 
-            for (int c = 0; c < 8; c++) {
+            final int piece = (2 * Radius) / minBuildThreadNum;
+            final List<Thread> calcThreads = new ArrayList<>(minBuildThreadNum);
+            final List<IslandBlockData> blockDataList = Collections.synchronizedList(new ArrayList<>(1024));
+
+            int c = 0;
+            while ((-Radius + piece * c) < Radius) {  // 补足因舍去小数位导致的精度缺失
                 final int count = c;
-                Thread buildThread = new Thread(() -> {
+                c++;
+
+                Thread calcThread = new Thread(() -> {
                     final int maxVal = min(Radius, (-Radius + piece * (count + 1)));
 
                     for (int x = -Radius + (count * piece); x < maxVal; x++) {
@@ -198,31 +161,32 @@ public class Creator {
                             }
                         }
                     }
-                });
+                }, "Island calc thread - " + (c + 1));
 
-                buildThread.start();
+                calcThread.start();
 
-                buildThreads.add(buildThread);
+                calcThreads.add(calcThread);
             }
 
-            for (Thread thread : buildThreads) {
-                try {
-                    thread.join();
+            Thread buildThread = new Thread(() -> {
+                for (Thread thread : calcThreads) {
+                    try {
+                        thread.join();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
                 }
-                catch (InterruptedException e) {
-                    return;
+
+                for (IslandBlockData blockData : blockDataList) {
+                    world.setBlockState(blockData.getBlockPos(), blockData.getBlockState() , 2);
+                    world.updateNeighbors(blockData.getBlockPos(), blockData.getBlock());
                 }
-            }
 
-            System.out.println("异步岛屿生成耗时：" + (System.currentTimeMillis() - start) + "ms");
-            start = System.currentTimeMillis();
+                player.sendMessage(Text.literal("The island has been generated successful!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
 
-            for (IslandBlockData blockData : blockDataList) {
-                world.setBlockState(blockData.getBlockPos(), blockData.getBlockState() , 2);
-                world.updateNeighbors(blockData.getBlockPos(), blockData.getBlock());
-            }
+            });
 
-            System.out.println("异步岛屿建造耗时：" + (System.currentTimeMillis() - start) + "ms");
+            buildThread.start();
         }
 
         else {
@@ -256,12 +220,15 @@ public class Creator {
                         else {
                             blockState = Blocks.STONE.getDefaultState();
                         }
+
                         world.setBlockState(blockPos, blockState , 2);
                         world.updateNeighbors(blockPos, blockState.getBlock());
+
                     }
                 }
             }
 
+            player.sendMessage(Text.literal("The island has been generated successful!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
             System.out.println("同步岛屿生成 & 建造耗时：" + (System.currentTimeMillis() - start) + "ms");
         }
     }
