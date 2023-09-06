@@ -5,10 +5,11 @@
 	"name": "Island Creator",
 	"description": "To make a island by algorithm, instead by hand.",
 	"authors": [
-		"XiaoMuchen"
+		"XiaoMuchen",
+		"Disy920"
 	],
 	"contact": {
-		"homepage": "",
+		"homepage": "https://www.starlight.cool",
 		"sources": "https://github.com/XiaoXuanyao/IslandCreator"
 	},
 	"license": "CC0-1.0",
@@ -26,7 +27,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.14.21",
-		"minecraft": "~1.20.1",
+		"minecraft": "1.19.*",
 		"java": ">=17",
 		"fabric-api": "*"
 	},

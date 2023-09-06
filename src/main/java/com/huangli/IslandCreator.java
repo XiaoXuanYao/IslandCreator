@@ -2,8 +2,10 @@ package com.huangli;
 
 import com.huangli.utils.Creator;
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -35,33 +37,63 @@ public class IslandCreator implements ModInitializer {
 										.then(argument("radius", integer()).
 												then(argument("height", integer()).
 														executes(ctx -> Creator.islandSettings(
-																		ctx.getSource(),
-																		getInteger(ctx, "radius"),
-																		getInteger(ctx, "height")
-																)
+																ctx.getSource(),
+																getInteger(ctx, "radius"),
+																getInteger(ctx, "height")
+															)
 														)
 												)
 										)
 								)
 								.then(literal("confirm")
-										.executes(ctx -> {
-											var source = ctx.getSource();
-											ServerPlayerEntity player = source.getPlayer();
+										.then(literal("async")
+												.executes(ctx -> islandCommand(ctx, true))
+										)
+										.then(literal("sync")
+												.executes(ctx -> islandCommand(ctx, false))
+										)
+										.then(literal("auto")
+												.executes(ctx -> {
+													if (Creator.Radius > 150 || Creator.Height > 150) {
+														return islandCommand(ctx, true);
+													}
+													else {
+														return islandCommand(ctx, false);
+													}
+												})
 
-											if (player == null) {
-												source.sendMessage(Text.literal("Only player can use this command!").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+										)
+										.executes(ctx -> {
+											if (Creator.Radius > 150 || Creator.Height > 150) {
+												return islandCommand(ctx, true);
 											}
 											else {
-												Creator.genIsland(player, player.getServerWorld());
-												source.sendMessage(Text.literal("The island has been generated successful!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+												return islandCommand(ctx, false);
 											}
-
-											return Command.SINGLE_SUCCESS;
 										})
 								)
-
 				));
-
 	}
+
+
+	private int islandCommand(CommandContext<ServerCommandSource> ctx, boolean async) {
+		var source = ctx.getSource();
+		ServerPlayerEntity player = source.getPlayer();
+
+		if (player == null) {
+			source.sendMessage(Text.literal("Only player can use this command!").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+		}
+		else {
+			try {
+				Creator.genIsland(player, player.world, async);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		return Command.SINGLE_SUCCESS;
+	}
+
 
 }
